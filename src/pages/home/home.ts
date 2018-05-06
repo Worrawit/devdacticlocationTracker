@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, Platform } from 'ionic-angular';
-import { Geolocation } from '@ionic-native/geolocation';
+import { Geolocation, PositionError, Geoposition } from '@ionic-native/geolocation';
 import { Subscription } from 'rxjs/Subscription';
 import { filter } from 'rxjs/operators';
 import { Storage } from '@ionic/storage';
@@ -19,6 +19,20 @@ export class HomePage {
   isTracking = false;
   trackedRoute = [];
   previousTracks = [];
+  geoLoc : any;
+  /*
+  previousTracks = [{ lat: "13.7342864", lng:"100.3291369" },
+                    { lat: "13.7342864", lng:"100.3291379" },
+                    { lat: "13.7342864", lng:"100.3291389" },
+                    { lat: "13.7342864", lng:"100.3291399" },
+                    { lat: "13.7342864", lng:"100.3291409" },
+                    { lat: "13.7342864", lng:"100.3291419" },
+                    { lat: "13.7342864", lng:"100.3291429" },
+                    { lat: "13.7342864", lng:"100.3291439" },
+                    { lat: "13.7342864", lng:"100.3291449" },
+                    { lat: "13.7342864", lng:"100.3291459" },
+                    { lat: "13.7342864", lng:"100.3291469" }];
+                    */
  
   positionSubscription: Subscription;
  
@@ -41,6 +55,9 @@ export class HomePage {
         let latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
         this.map.setCenter(latLng);
         this.map.setZoom(16);
+        console.log("lat : " + pos.coords.latitude);
+        console.log("long : " + pos.coords.longitude);
+        console.log("latLng : " + latLng);
       }).catch((error) => {
         console.log('Error getting location', error);
       });
@@ -65,23 +82,33 @@ export class HomePage {
       )
       .subscribe(data => {
         setTimeout(() => {
+          console.log("data " + data);
+          console.log("lat : " + data.coords.latitude);
+          console.log("lat : " + data.coords.longitude);
           this.trackedRoute.push({ lat: data.coords.latitude, lng: data.coords.longitude });
+          this.trackedRoute.push({ lat: data.coords.latitude + 0.0003, lng: data.coords.longitude + 0.0003});
+          this.trackedRoute.push({ lat: data.coords.latitude - 0.0003, lng: data.coords.longitude});
           this.redrawPath(this.trackedRoute);
         }, 0);
       });
- 
+    
   }
+
+  
  
   redrawPath(path) {
+    //console.log("path "+ path[0].lat);
     if (this.currentMapTrack) {
       this.currentMapTrack.setMap(null);
+      console.log("test null");
     }
  
     if (path.length > 1) {
+      console.log("test path");
       this.currentMapTrack = new google.maps.Polyline({
         path: path,
         geodesic: true,
-        strokeColor: '#ff00ff',
+        strokeColor: '#ff0000',
         strokeOpacity: 1.0,
         strokeWeight: 3
       });
