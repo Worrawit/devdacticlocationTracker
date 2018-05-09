@@ -1,6 +1,7 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, Platform } from 'ionic-angular';
 import { Geolocation, PositionError, Geoposition } from '@ionic-native/geolocation';
+import { Geofence } from '@ionic-native/geofence';
 import { Subscription } from 'rxjs/Subscription';
 import { filter } from 'rxjs/operators';
 import { Storage } from '@ionic/storage';
@@ -36,7 +37,8 @@ export class HomePage {
  
   positionSubscription: Subscription;
  
-  constructor(public navCtrl: NavController, private plt: Platform, private geolocation: Geolocation, private storage: Storage) { }
+  constructor(public navCtrl: NavController, private plt: Platform, private geolocation: Geolocation, private storage: Storage
+              ,private geofence: Geofence) { }
  
   ionViewDidLoad() {
     this.plt.ready().then(() => {
@@ -75,6 +77,8 @@ export class HomePage {
   startTracking() {
     this.isTracking = true;
     this.trackedRoute = [];
+    let rlat;
+    let rlng;
  
     this.positionSubscription = this.geolocation.watchPosition()
       .pipe(
@@ -86,9 +90,65 @@ export class HomePage {
           console.log("lat : " + data.coords.latitude);
           console.log("lat : " + data.coords.longitude);
           this.trackedRoute.push({ lat: data.coords.latitude, lng: data.coords.longitude });
-          this.trackedRoute.push({ lat: data.coords.latitude + 0.0003, lng: data.coords.longitude + 0.0003});
-          this.trackedRoute.push({ lat: data.coords.latitude - 0.0003, lng: data.coords.longitude});
+          rlat = Math.floor((Math.random() * 100) + 1)/100000;
+          rlng = Math.floor((Math.random() * 100) + 1)/100000;
+          this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
+          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
+          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
           this.redrawPath(this.trackedRoute);
+          this.addGeofence(data);
+
+         
+
         }, 0);
       });
     
@@ -108,7 +168,7 @@ export class HomePage {
       this.currentMapTrack = new google.maps.Polyline({
         path: path,
         geodesic: true,
-        strokeColor: '#ff0000',
+        strokeColor: '#00ffff',
         strokeOpacity: 1.0,
         strokeWeight: 3
       });
@@ -128,5 +188,31 @@ export class HomePage {
    
   showHistoryRoute(route) {
     this.redrawPath(route);
+  }
+
+  private addGeofence(data) {
+    //options describing geofence
+    console.log( "latitude: " + data.coords.latitude);
+    console.log( "longitude: " + data.coords.longitude);
+
+    let fence = {
+      id: '69ca1b88-6fbe-4e80-a4d4-ff4d3748acdb', //any unique ID
+      latitude:       data.coords.latitude, //center of geofence radius
+      longitude:      data.coords.longitude,
+      radius:         3000, //radius to edge of geofence in meters
+      transitionType: 3, //see 'Transition Types' below
+      notification: { //notification settings
+          id:             1, //any unique ID
+          title:          'You crossed a fence', //notification title
+          text:           'You just arrived to Gliwice city center.', //notification body
+          openAppOnClick: true //open app when notification is tapped
+      }
+    }
+  
+    this.geofence.addOrUpdate(data).then(() => 
+        console.log('Geofence added'),
+        (err) => console.log('Geofence failed to add : '+ err)
+    );
+    
   }
 }
