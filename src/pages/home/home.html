@@ -19,10 +19,13 @@
  
   <div #map id="map"></div>
  
+  <button ion-button full icon-left (click)="clearHistory()">
+    Clear History
+  </button>
   <ion-list>
     <ion-list-header>Previous Tracks</ion-list-header>
     <ion-item *ngFor="let route of previousTracks">
-      {{ route.finished | date }}, {{ route.path.length }} Waypoints
+      {{ route.finished | date }}, {{ route.Distance / route.time }} KM/Hour
       <button ion-button clear item-end (click)="showHistoryRoute(route.path)">View Route</button>
     </ion-item>
   </ion-list>

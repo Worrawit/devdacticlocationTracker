@@ -10,6 +10,7 @@ import { HomePage } from '../pages/home/home';
 import { Geolocation } from '@ionic-native/geolocation';
 import { Geofence } from '@ionic-native/geofence';
 import { IonicStorageModule } from '@ionic/storage';
+//import { Camera } from '@ionic-native/camera';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { IonicStorageModule } from '@ionic/storage';
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     Geolocation,
-    Geofence
+    Geofence,
+    //Camera
   ]
 })
 export class AppModule {}

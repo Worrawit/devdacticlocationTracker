@@ -1,10 +1,11 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, Platform } from 'ionic-angular';
-import { Geolocation, PositionError, Geoposition } from '@ionic-native/geolocation';
+import { Geolocation } from '@ionic-native/geolocation';
 import { Geofence } from '@ionic-native/geofence';
 import { Subscription } from 'rxjs/Subscription';
 import { filter } from 'rxjs/operators';
 import { Storage } from '@ionic/storage';
+import { geofenceConfig, polylineConfig, distanceConfig } from "../../app/geofenceConfig"
  
 declare var google;
  
@@ -21,27 +22,23 @@ export class HomePage {
   trackedRoute = [];
   previousTracks = [];
   geoLoc : any;
-  /*
-  previousTracks = [{ lat: "13.7342864", lng:"100.3291369" },
-                    { lat: "13.7342864", lng:"100.3291379" },
-                    { lat: "13.7342864", lng:"100.3291389" },
-                    { lat: "13.7342864", lng:"100.3291399" },
-                    { lat: "13.7342864", lng:"100.3291409" },
-                    { lat: "13.7342864", lng:"100.3291419" },
-                    { lat: "13.7342864", lng:"100.3291429" },
-                    { lat: "13.7342864", lng:"100.3291439" },
-                    { lat: "13.7342864", lng:"100.3291449" },
-                    { lat: "13.7342864", lng:"100.3291459" },
-                    { lat: "13.7342864", lng:"100.3291469" }];
-                    */
- 
+
   positionSubscription: Subscription;
  
   constructor(public navCtrl: NavController, private plt: Platform, private geolocation: Geolocation, private storage: Storage
-              ,private geofence: Geofence) { }
+              ,private geofence: Geofence) { 
+               //this.storage.clear();
+              }
  
   ionViewDidLoad() {
     this.plt.ready().then(() => {
+
+      this.geofence.initialize().then(
+        // resolved promise does not return a value
+        () => console.log('Geofence Plugin Ready'),
+        (err) => console.log("error " + err)
+      )
+
       this.loadHistoricRoutes();
  
       let mapOptions = {
@@ -57,13 +54,16 @@ export class HomePage {
         let latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
         this.map.setCenter(latLng);
         this.map.setZoom(16);
-        console.log("lat : " + pos.coords.latitude);
-        console.log("long : " + pos.coords.longitude);
-        console.log("latLng : " + latLng);
+        this.addGeofence(pos);
       }).catch((error) => {
         console.log('Error getting location', error);
       });
     });
+  }
+
+  clearHistory() {
+    this.storage.clear();
+    this.previousTracks = [];
   }
  
   loadHistoricRoutes() {
@@ -77,8 +77,16 @@ export class HomePage {
   startTracking() {
     this.isTracking = true;
     this.trackedRoute = [];
-    let rlat;
-    let rlng;
+    let previouslat = 0;
+    let previouslong = 0;
+    let dist;
+    let previousTime = Date.now();
+    let currentTime = Date.now();
+    let clock;
+    let previousDist= 0;
+   
+    // let rlat;
+    // let rlng;
  
     this.positionSubscription = this.geolocation.watchPosition()
       .pipe(
@@ -86,75 +94,66 @@ export class HomePage {
       )
       .subscribe(data => {
         setTimeout(() => {
-          console.log("data " + data);
-          console.log("lat : " + data.coords.latitude);
-          console.log("lat : " + data.coords.longitude);
-          this.trackedRoute.push({ lat: data.coords.latitude, lng: data.coords.longitude });
-          rlat = Math.floor((Math.random() * 100) + 1)/100000;
-          rlng = Math.floor((Math.random() * 100) + 1)/100000;
-          this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
-          // rlat = rlat + Math.floor((Math.random() * 100) + 1)/100000;
-          // rlng = rlng + Math.floor((Math.random() * 100) + 1)/100000;
-          // this.trackedRoute.push({ lat: data.coords.latitude + rlat, lng: data.coords.longitude + rlng});
+
+          if(previouslat == 0){
+            previouslat = data.coords.latitude;
+          }
+          if(previouslong == 0){
+            previouslong = data.coords.longitude;
+          }
+          dist = this.getDistanceFromLatLon(previouslat, previouslong, data.coords.latitude, data.coords.longitude);
+
+          clock = currentTime - previousTime;
+
+          if (distanceConfig.timeUnit =="H") { clock = clock / 3600000; }
+          if (distanceConfig.timeUnit =="m") { clock = clock / 60000; }
+          if (distanceConfig.timeUnit =="s") { clock = clock / 1000; }
+
+          console.log("distance : " + dist);
+          console.log("clock : " + clock);
+
+          this.trackedRoute.push({  lat: data.coords.latitude, 
+                                    lng: data.coords.longitude, 
+                                    timestamp: currentTime, 
+                                    distance: dist, 
+                                    time: clock,
+                                    totalDistance: previousDist + dist});
+          previouslat = data.coords.latitude;
+          previouslong = data.coords.longitude;
+          previousTime = currentTime;
+          previousDist = previousDist + dist;
+
+          console.log("new locaton");
           this.redrawPath(this.trackedRoute);
           this.addGeofence(data);
-
-         
-
         }, 0);
       });
     
   }
 
-  
+  getDistanceFromLatLon(lat1,lon1,lat2,lon2){
+
+    let R; // Radius of the earth in km
+    let dLat = this.deg2rad(lat2-lat1);  // deg2rad below
+    let dLon = this.deg2rad(lon2-lon1); 
+    let a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2)
+      ; 
+    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    if (distanceConfig.unit =="M") { R = 3958.75587; }
+    if (distanceConfig.unit =="K") { R = 6371; }
+    if (distanceConfig.unit =="N") { R = 3437.78359; }
+    let d = R * c; // Distance in km
+    return d;
+   }
+
+
+   deg2rad(deg) {
+    return deg * (Math.PI/180)
+   }
  
   redrawPath(path) {
     //console.log("path "+ path[0].lat);
@@ -168,22 +167,26 @@ export class HomePage {
       this.currentMapTrack = new google.maps.Polyline({
         path: path,
         geodesic: true,
-        strokeColor: '#00ffff',
-        strokeOpacity: 1.0,
-        strokeWeight: 3
+        strokeColor: polylineConfig.strokeColor,
+        strokeOpacity: polylineConfig.strokeOpacity,
+        strokeWeight: polylineConfig.strokeWeight
       });
       this.currentMapTrack.setMap(this.map);
     }
   }
 
   stopTracking() {
-    let newRoute = { finished: new Date().getTime(), path: this.trackedRoute };
+    let timer = this.trackedRoute[this.trackedRoute.length-1].time - this.trackedRoute[0].time;
+    let totalDist = this.trackedRoute[this.trackedRoute.length-1].totalDistance;
+
+    let newRoute = { finished: new Date().getTime(), path: this.trackedRoute, Distance: totalDist,  time: timer};
     this.previousTracks.push(newRoute);
     this.storage.set('routes', this.previousTracks);
    
     this.isTracking = false;
     this.positionSubscription.unsubscribe();
     this.currentMapTrack.setMap(null);
+    //this.currentMapTrack = null;
   }
    
   showHistoryRoute(route) {
@@ -198,9 +201,9 @@ export class HomePage {
     let fence = {
       id: '69ca1b88-6fbe-4e80-a4d4-ff4d3748acdb', //any unique ID
       latitude:       data.coords.latitude, //center of geofence radius
-      longitude:      data.coords.longitude,
-      radius:         3000, //radius to edge of geofence in meters
-      transitionType: 3, //see 'Transition Types' below
+      longitude:      data.coords.longitude, //center of geofence radius
+      radius:         geofenceConfig.radius, //radius to edge of geofence in meters
+      transitionType: geofenceConfig.transitionType, //Type of transition 1 - Enter, 2 - Exit, 3 - Both
       notification: { //notification settings
           id:             1, //any unique ID
           title:          'You crossed a fence', //notification title
@@ -209,7 +212,7 @@ export class HomePage {
       }
     }
   
-    this.geofence.addOrUpdate(data).then(() => 
+    this.geofence.addOrUpdate(fence).then(() => 
         console.log('Geofence added'),
         (err) => console.log('Geofence failed to add : '+ err)
     );
