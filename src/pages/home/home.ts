@@ -1,11 +1,11 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, Platform } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
-import { Geofence } from '@ionic-native/geofence';
+//import { Geofence } from '@ionic-native/geofence';
 import { Subscription } from 'rxjs/Subscription';
 import { filter } from 'rxjs/operators';
 import { Storage } from '@ionic/storage';
-import { geofenceConfig, polylineConfig, distanceConfig } from "../../app/geofenceConfig"
+import { polylineConfig, distanceConfig } from "../../app/geofenceConfig"
  
 declare var google;
  
@@ -26,18 +26,19 @@ export class HomePage {
   positionSubscription: Subscription;
  
   constructor(public navCtrl: NavController, private plt: Platform, private geolocation: Geolocation, private storage: Storage
-              ,private geofence: Geofence) { 
+              ) { 
                //this.storage.clear();
               }
  
   ionViewDidLoad() {
+    //console.log(this.getDistanceFromLatLon(13.7344093,100.3283594,13.7544093,100.3283594));
     this.plt.ready().then(() => {
 
-      this.geofence.initialize().then(
-        // resolved promise does not return a value
-        () => console.log('Geofence Plugin Ready'),
-        (err) => console.log("error " + err)
-      )
+      // this.geofence.initialize().then(
+      //   // resolved promise does not return a value
+      //   () => console.log('Geofence Plugin Ready'),
+      //   (err) => console.log("error " + err)
+      // )
 
       this.loadHistoricRoutes();
  
@@ -54,7 +55,7 @@ export class HomePage {
         let latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
         this.map.setCenter(latLng);
         this.map.setZoom(16);
-        this.addGeofence(pos);
+        //this.addGeofence(pos);
       }).catch((error) => {
         console.log('Error getting location', error);
       });
@@ -77,13 +78,16 @@ export class HomePage {
   startTracking() {
     this.isTracking = true;
     this.trackedRoute = [];
+
+    //
     let previouslat = 0;
     let previouslong = 0;
-    let dist;
-    let previousTime = Date.now();
-    let currentTime = Date.now();
-    let clock;
     let previousDist= 0;
+    let dist= 0;
+    //let previousTime = 0;
+    let currentTime = Date.now();
+    //let clock;
+    
    
     // let rlat;
     // let rlng;
@@ -101,31 +105,28 @@ export class HomePage {
           if(previouslong == 0){
             previouslong = data.coords.longitude;
           }
+          
           dist = this.getDistanceFromLatLon(previouslat, previouslong, data.coords.latitude, data.coords.longitude);
 
-          clock = currentTime - previousTime;
+          currentTime = Date.now();
 
-          if (distanceConfig.timeUnit =="H") { clock = clock / 3600000; }
-          if (distanceConfig.timeUnit =="m") { clock = clock / 60000; }
-          if (distanceConfig.timeUnit =="s") { clock = clock / 1000; }
-
-          console.log("distance : " + dist);
-          console.log("clock : " + clock);
+          console.log("currentTime " + currentTime);
 
           this.trackedRoute.push({  lat: data.coords.latitude, 
                                     lng: data.coords.longitude, 
                                     timestamp: currentTime, 
-                                    distance: dist, 
-                                    time: clock,
+                                    distanceForPreviousToCurrent: dist, 
+                                    //timeForPreviousToCurrent: clock,
                                     totalDistance: previousDist + dist});
           previouslat = data.coords.latitude;
           previouslong = data.coords.longitude;
-          previousTime = currentTime;
+          //previousTime = currentTime;
           previousDist = previousDist + dist;
+          console.log("previousDist " + previousDist);
 
           console.log("new locaton");
           this.redrawPath(this.trackedRoute);
-          this.addGeofence(data);
+          //this.addGeofence(data);
         }, 0);
       });
     
@@ -159,11 +160,11 @@ export class HomePage {
     //console.log("path "+ path[0].lat);
     if (this.currentMapTrack) {
       this.currentMapTrack.setMap(null);
-      console.log("test null");
+      //console.log("test null");
     }
  
     if (path.length > 1) {
-      console.log("test path");
+      //console.log("test path");
       this.currentMapTrack = new google.maps.Polyline({
         path: path,
         geodesic: true,
@@ -176,8 +177,17 @@ export class HomePage {
   }
 
   stopTracking() {
-    let timer = this.trackedRoute[this.trackedRoute.length-1].time - this.trackedRoute[0].time;
     let totalDist = this.trackedRoute[this.trackedRoute.length-1].totalDistance;
+    totalDist = totalDist.toFixed(3)
+    let timer = Date.now() - this.trackedRoute[0].timestamp;
+    
+    if (distanceConfig.timeUnit =="H") { timer = timer / 3600000; }
+    if (distanceConfig.timeUnit =="m") { timer = timer / 60000; }
+    if (distanceConfig.timeUnit =="s") { timer = timer / 1000; }
+    
+    console.log("totalDist " + totalDist);
+    console.log("timer " + timer);
+
 
     let newRoute = { finished: new Date().getTime(), path: this.trackedRoute, Distance: totalDist,  time: timer};
     this.previousTracks.push(newRoute);
@@ -193,29 +203,29 @@ export class HomePage {
     this.redrawPath(route);
   }
 
-  private addGeofence(data) {
-    //options describing geofence
-    console.log( "latitude: " + data.coords.latitude);
-    console.log( "longitude: " + data.coords.longitude);
+  // private addGeofence(data) {
+  //   //options describing geofence
+  //   console.log( "latitude: " + data.coords.latitude);
+  //   console.log( "longitude: " + data.coords.longitude);
 
-    let fence = {
-      id: '69ca1b88-6fbe-4e80-a4d4-ff4d3748acdb', //any unique ID
-      latitude:       data.coords.latitude, //center of geofence radius
-      longitude:      data.coords.longitude, //center of geofence radius
-      radius:         geofenceConfig.radius, //radius to edge of geofence in meters
-      transitionType: geofenceConfig.transitionType, //Type of transition 1 - Enter, 2 - Exit, 3 - Both
-      notification: { //notification settings
-          id:             1, //any unique ID
-          title:          'You crossed a fence', //notification title
-          text:           'You just arrived to Gliwice city center.', //notification body
-          openAppOnClick: true //open app when notification is tapped
-      }
-    }
+  //   let fence = {
+  //     id: '69ca1b88-6fbe-4e80-a4d4-ff4d3748acdb', //any unique ID
+  //     latitude:       data.coords.latitude, //center of geofence radius
+  //     longitude:      data.coords.longitude, //center of geofence radius
+  //     radius:         geofenceConfig.radius, //radius to edge of geofence in meters
+  //     transitionType: geofenceConfig.transitionType, //Type of transition 1 - Enter, 2 - Exit, 3 - Both
+  //     notification: { //notification settings
+  //         id:             1, //any unique ID
+  //         title:          'You crossed a fence', //notification title
+  //         text:           'You just arrived to Gliwice city center.', //notification body
+  //         openAppOnClick: true //open app when notification is tapped
+  //     }
+  //   }
   
-    this.geofence.addOrUpdate(fence).then(() => 
-        console.log('Geofence added'),
-        (err) => console.log('Geofence failed to add : '+ err)
-    );
+  //   this.geofence.addOrUpdate(fence).then(() => 
+  //       console.log('Geofence added'),
+  //       (err) => console.log('Geofence failed to add : '+ err)
+  //   );
     
-  }
+  // }
 }

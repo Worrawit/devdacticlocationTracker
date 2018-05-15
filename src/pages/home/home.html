@@ -25,7 +25,8 @@
   <ion-list>
     <ion-list-header>Previous Tracks</ion-list-header>
     <ion-item *ngFor="let route of previousTracks">
-      {{ route.finished | date }}, {{ route.Distance / route.time }} KM/Hour
+      <!-- {{ route.finished | date }}, {{ route.Distance / route.time }} KM/Hour -->
+      {{ route.Distance }} KM
       <button ion-button clear item-end (click)="showHistoryRoute(route.path)">View Route</button>
     </ion-item>
   </ion-list>

@@ -1,5 +1,5 @@
 {
-  "name": "devdacticLocationTracker",
+  "name": "LocationTracker",
   "app_id": "",
   "type": "ionic-angular",
   "integrations": {

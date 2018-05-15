@@ -17,5 +17,5 @@ export const distanceConfig = {
     //'H' is Hour
     //'m' is min
     //'s' is sec
-    timeUnit : "H"
+    timeUnit : "s"
 };
