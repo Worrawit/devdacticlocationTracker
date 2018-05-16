@@ -1,6 +1,7 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, Platform } from 'ionic-angular';
-import { Geolocation } from '@ionic-native/geolocation';
+import { Coordinates, Geolocation } from '@ionic-native/geolocation';
+import { AndroidPermissions } from '@ionic-native/android-permissions';
 //import { Geofence } from '@ionic-native/geofence';
 import { Subscription } from 'rxjs/Subscription';
 import { filter } from 'rxjs/operators';
@@ -24,41 +25,83 @@ export class HomePage {
   geoLoc : any;
 
   positionSubscription: Subscription;
+  location: Coordinates;
  
-  constructor(public navCtrl: NavController, private plt: Platform, private geolocation: Geolocation, private storage: Storage
+  constructor(public navCtrl: NavController, private plt: Platform, private geolocation: Geolocation, 
+              private storage: Storage, private androidPermissions:AndroidPermissions
               ) { 
                //this.storage.clear();
               }
  
   ionViewDidLoad() {
     //console.log(this.getDistanceFromLatLon(13.7344093,100.3283594,13.7544093,100.3283594));
+    
     this.plt.ready().then(() => {
-
+      //alert("plt load");
       // this.geofence.initialize().then(
       //   // resolved promise does not return a value
       //   () => console.log('Geofence Plugin Ready'),
       //   (err) => console.log("error " + err)
       // )
 
+      // this.androidPermissions.checkPermission(this.androidPermissions.PERMISSION.ACCESS_COARSE_LOCATION).then(
+      //   result => console.log('Has permission ACCESS_COARSE_LOCATION?',result.hasPermission),
+      //   err => this.androidPermissions.requestPermission("error" + this.androidPermissions.PERMISSION.ACCESS_COARSE_LOCATION)
+      // );
+
+      // this.androidPermissions.checkPermission(this.androidPermissions.PERMISSION.ACCESS_FINE_LOCATION).then(
+      //   result => console.log('Has permission ACCESS_FINE_LOCATION?',result.hasPermission),
+      //   err => this.androidPermissions.requestPermission("error" + this.androidPermissions.PERMISSION.ACCESS_FINE_LOCATION)
+      // );
+
+      // this.androidPermissions.checkPermission(this.androidPermissions.PERMISSION.ACCESS_LOCATION_EXTRA_COMMANDS).then(
+      //   result => console.log('Has permission ACCESS_LOCATION_EXTRA_COMMANDS?', result.hasPermission),
+      //   err => this.androidPermissions.requestPermission("error" + this.androidPermissions.PERMISSION.ACCESS_LOCATION_EXTRA_COMMANDS)
+      // );
+
       this.loadHistoricRoutes();
  
-      let mapOptions = {
-        zoom: 13,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false
-      }
-      this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
+      this.get_current_position();
  
-      this.geolocation.getCurrentPosition().then(pos => {
-        let latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-        this.map.setCenter(latLng);
-        this.map.setZoom(16);
-        //this.addGeofence(pos);
-      }).catch((error) => {
-        console.log('Error getting location', error);
-      });
+      
+    });
+  }
+
+  // async getLocation() {
+  //   await this.platform.ready();
+  //   const { coords } = await this.geolocation.getCurrentPosition();
+  //   this.location = coords;
+  // }
+
+  async get_current_position() {
+    
+
+    let mapOptions = {
+      zoom: 13,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false
+    };
+    let option = {
+      timeout:5000
+    };
+
+    this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
+    // this.map.setCenter({ lat: 13.7344093, lng: 100.3283594 });
+    // this.map.setZoom(16);
+    alert("OK1");
+
+    this.geolocation.getCurrentPosition(option).then(pos => {
+      let latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+      this.map.setCenter(latLng);
+      this.map.setZoom(16);
+      //this.addGeofence(pos);
+      alert("OK2");
+    }).catch((error) => {
+      console.log('Error getting location', error);
+      alert("ERROR : " +JSON.stringify(error));
+      alert("ERROR : " +error);
     });
   }
 
