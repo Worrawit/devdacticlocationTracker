@@ -4,7 +4,7 @@ export const geofenceConfig = {
 };
 
 export const polylineConfig = {
-    strokeColor     : '#00cc00',
+    strokeColor     : '#0099ff',
     strokeOpacity   : 1.0,
     strokeWeight    : 3
 };
